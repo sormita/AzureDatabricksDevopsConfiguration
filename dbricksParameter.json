@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "eastus"
+        },        
+        "adbTier": {
+            "value": "premium"
+        },
+        "adbEnableNoPublicIp": {
+            "value": true
+        },
+        "adbVnetName": {
+            "value": "xxxxx-vnet"
+        },
+        "adbSubscriptionID": {
+            "value": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
+        },
+        "adbPublicSubnetName": {
+            "value": "snet-databricks-public"
+        },
+        "adbPrivateSubnetName": {
+            "value": "snet-databricks-private"
+        },
+        "adbWorkSpaceName": {
+            "value": "dbw-dev"
+        },
+        "adbManagedResourceGroupName": {
+            "value": "databricks-rg-dbw-dev-managedRG"
+        },
+        "adbNsgName": {
+            "value": "databricksnsg-dev-poc"
+        },
+        "adbResourceGroupName": {
+            "value": "xxxx"
+        },
+        "adbPublicSubnetCIDR": {
+            "value": "10.0.1.0/26"
+        },
+        "adbPrivateSubnetCIDR": {
+            "value": "10.0.2.0/26"
+        },
+        "adbVnetRG": {
+            "value": "xxxx"
+        }
+    }
+}

@@ -1,0 +1,95 @@
+{   
+ "folders":
+ [  
+   "/Folder1/SubFolder1","/Folder2/SubFolder2","/Folder3/SubFolder3"
+ ],
+ "clusters": 
+ [
+   {
+     "cluster_specs_cluster_name": "test-aue-adb-hccluster",
+     "cluster_specs_spark_version": "8.2.x-scala2.12",
+     "cluster_specs_node_type_id": "Standard_L8s_v2",
+     "cluster_specs_driver_node_type_id": "Standard_DS13_v2",
+     "cluster_specs_autotermination_minutes": 45,
+     "cluster_specs_autoscale_min_workers": 2,
+     "cluster_specs_autoscale_max_workers": 8          
+   }
+ ],
+ "groups":
+ [
+  {
+   "group_name": "DataEngineer",
+   "cluster_name": "test-aue-adb-hccluster",
+   "permission_level": 
+   [
+    "CAN_RESTART","CAN_MANAGE","CAN_ATTACH_TO"
+   ]
+  },
+  {
+   "group_name": "TestEngineer",
+   "cluster_name": "test-aue-adb-hccluster",
+   "permission_level": 
+   [
+    "CAN_ATTACH_TO"
+   ]
+  }
+ ],
+ "folderAccess":
+    [
+     {
+	  "id": 1,
+      "group_name": "DataEngineer",
+      "folder_name": "/FutureGrid",
+      "permission_level": 
+      [
+       "CAN_MANAGE","CAN_RUN","CAN_EDIT","CAN_READ"
+      ]
+     },
+	 {
+	  "id": 2,
+      "group_name": "TestEngineer",
+      "folder_name": "/FutureGrid",
+      "permission_level": 
+      [
+       "CAN_READ"
+      ]
+     },
+     {
+	  "id": 3,
+      "group_name": "TestEngineer",
+      "folder_name": "/Util",
+      "permission_level": 
+      [
+       "CAN_READ"
+      ]
+     },
+     {
+	  "id": 4,
+      "group_name": "DataEngineer",
+      "folder_name": "/Util",
+      "permission_level": 
+      [
+       "CAN_MANAGE"
+      ]
+     },
+     {
+	  "id": 5,
+      "group_name": "TestEngineer",
+      "folder_name": "/UnitTesting",
+      "permission_level": 
+      [
+       "CAN_MANAGE"
+      ]
+     },
+     {
+	  "id": 6,
+      "group_name": "DataEngineer",
+      "folder_name": "/UnitTesting",
+      "permission_level": 
+      [
+       "CAN_RUN"
+      ]
+     }
+    ]
+ 
+}

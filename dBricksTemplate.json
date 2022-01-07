@@ -1,0 +1,164 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+			"metadata": {
+                "description": "location for the deployment"
+            },
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "adbTier": {            
+            "type": "string",
+            "defaultValue": "premium"
+        },
+        "adbEnableNoPublicIp": {
+            "type": "bool",
+            "defaultValue": true
+        },
+        "adbVnetName": {
+            "type": "string"
+        },
+        "adbVnetRG": {
+            "type": "string"
+        },
+        "adbSubscriptionID": {
+            "type": "string",
+            "defaultValue": "[subscription().id]"
+        },
+        "adbPublicSubnetName": {
+            "type": "string"
+        },
+        "adbPublicSubnetCIDR": {
+            "type": "string"
+        },
+        "adbPrivateSubnetName": {
+            "type": "string"
+        },
+        "adbPrivateSubnetCIDR": {
+            "type": "string"
+        },
+        "adbWorkSpaceName": {
+            "type": "string"
+        },
+        "adbManagedResourceGroupName": {
+            "type": "string"
+        },
+        "adbNsgName": {
+            "type": "string"
+        },
+        "adbResourceGroupName": {
+            "type": "string",
+             "defaultValue": "[resourceGroup().name]"
+        }
+    },
+    "variables": {        
+        "managedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('adbManagedResourceGroupName'))]",        
+        "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('adbNsgName'))]", 
+        "vnetId": "[concat('/subscriptions/', parameters('adbSubscriptionID'),'/resourceGroups/',parameters('adbVnetRG'),'/providers/Microsoft.Network/virtualNetworks/',parameters('adbVnetName'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-04-01",
+            "location": "[parameters('location')]",
+            "name": "[parameters('adbWorkSpaceName')]",
+            "sku": {
+                "name": "[parameters('adbTier')]"
+            },
+            "comments": "Please do not use an existing resource group for ManagedResourceGroupId.",
+            "properties": {
+                "ManagedResourceGroupId": "[variables('managedResourceGroupId')]",
+                "parameters": {
+                    "enableNoPublicIp": {
+                        "value": "[parameters('adbEnableNoPublicIp')]"
+                    },
+                    "customVirtualNetworkId": {
+                        "value": "[variables('vnetId')]"
+                    },
+                    "customPublicSubnetName": {
+                        "value": "[parameters('adbPublicSubnetName')]"
+                    },
+                    "customPrivateSubnetName": {
+                        "value": "[parameters('adbPrivateSubnetName')]"
+                    }
+                }
+            },
+            "type": "Microsoft.Databricks/workspaces",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('adbNsgName'))]",
+                "Microsoft.Resources/deployments/nestedTemplate"
+            ]
+        },
+        {
+            "apiVersion": "2019-06-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "location": "[parameters('location')]",
+            "name": "[parameters('adbNsgName')]"
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "nestedTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('adbNsgName'))]"
+            ],
+            "resourceGroup": "[parameters('adbVnetRG')]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2019-06-01",
+                            "type": "Microsoft.Network/virtualNetworks/subnets",
+                            "name": "[concat(parameters('adbVnetName'), '/', parameters('adbPublicSubnetName'))]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "addressPrefix": "[parameters('adbPublicSubnetCIDR')]",
+                                "networkSecurityGroup": {
+                                    "id": "[variables('nsgId')]"
+                                },
+                                "delegations": [
+                                    {
+                                        "name": "[concat('databricks-del-', uniqueString(parameters('adbPublicSubnetName')))]",
+                                        "properties": {
+                                            "serviceName": "Microsoft.Databricks/workspaces"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "apiVersion": "2019-06-01",
+                            "type": "Microsoft.Network/virtualNetworks/subnets",
+                            "name": "[concat(parameters('adbVnetName'), '/', parameters('adbPrivateSubnetName'))]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[concat('Microsoft.Network/virtualNetworks/', parameters('adbVnetName'), '/subnets/', parameters('adbPublicSubnetName'))]"
+                            ],
+                            "properties": {
+                                "addressPrefix": "[parameters('adbPrivateSubnetCIDR')]",
+                                "networkSecurityGroup": {
+                                    "id": "[variables('nsgId')]"
+                                },
+                                "delegations": [
+                                    {
+                                        "name": "[concat('databricks-del-', uniqueString(parameters('adbPublicSubnetName')))]",
+                                        "properties": {
+                                            "serviceName": "Microsoft.Databricks/workspaces"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "parameters": {}
+            }
+        }
+    ]
+}
